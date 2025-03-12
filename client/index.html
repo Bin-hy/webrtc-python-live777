@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebRTC 视频流接收</title>
+        <style>
+            /* 添加基础样式确保元素可见 */
+            #remoteVideo {
+                width: 640px;
+                height: 480px;
+                background: #000;
+            }
+            #playButton {
+                padding: 10px 20px;
+                font-size: 16px;
+                margin: 20px;
+            }
+        </style>
+    </head>
+
+<body>
+    <video id="remoteVideo" autoplay playsinline muted></video>
+    <button id="playButton" style="display: none;">点击开始播放</button>
+    <script>
+        const config = {
+            iceServers: [{ urls: 
+                "stun:stun.l.google.com:19302"
+             }]
+        };
+        const ws = new WebSocket("ws://localhost:1111");
+        const pc = new RTCPeerConnection(config);
+        const remoteVideo = document.getElementById("remoteVideo");
+        const playButton = document.getElementById("playButton");
+
+        // 静音播放
+        remoteVideo.muted = true;
+
+        pc.ontrack = (event) => {
+            if (event.track.kind === "video") {
+                remoteVideo.srcObject = event.streams[0];
+                remoteVideo.onloadedmetadata = () => {
+                    console.log("视频分辨率:", 
+                        remoteVideo.videoWidth + "x" + remoteVideo.videoHeight);
+                };
+                // 自动尝试播放（静音模式下允许）
+                remoteVideo.play().catch(e => {
+                    console.error("自动播放失败，等待用户交互:", e);
+                    playButton.style.display = "block";
+                });
+            }
+        };
+
+        playButton.addEventListener("click", () => {
+            remoteVideo.play().catch(e => console.error("手动播放失败:", e));
+            playButton.style.display = "none";
+        });
+
+        pc.onicecandidate = (event) => {
+            console.log("my icecandidate" ,event)
+            if (event.candidate) {
+                ws.send(JSON.stringify({
+                    type: "candidate",
+                    candidate: event.candidate.candidate,
+                    sdpMid: event.candidate.sdpMid,
+                    sdpMLineIndex: event.candidate.sdpMLineIndex,
+                    port: event.candidate.port,
+                    priority: event.candidate.priority,
+                    protocol: event.candidate.protocol,
+                    type: event.candidate.type
+                }));
+            }
+        };
+
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            switch (data.type) {
+                case "offer":
+                    try {
+                        await pc.setRemoteDescription(new RTCSessionDescription(data));
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        ws.send(JSON.stringify({ type: "answer", sdp: answer.sdp }));
+                    } catch (e) {
+                        console.error("处理 Offer 失败:", e);
+                    }
+                    break;
+                case "candidate":
+                    try {
+                        await pc.addIceCandidate(new RTCIceCandidate(data));
+                    } catch (e) {
+                        console.error("添加 ICE Candidate 失败:", e);
+                    }
+                    break;
+            }
+        };
+
+        ws.onopen = () => {
+            ws.send("browser");
+        };
+    </script>
+</body>
+</html>
