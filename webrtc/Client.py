@@ -19,6 +19,9 @@ class OpenCVCaptureTrack(VideoStreamTrack):
 
 async def run_webrtc():
     pc = RTCPeerConnection()
+    # import cv2
+    # gstreamer_str = "udpsrc address=230.1.1.1 port=1720 multicast-iface=eno0 ! application/x-rtp, media=video, encoding-name=H264 ! rtph264depay ! h264parse ! avdec_h264 ! videoconvert ! video/x-raw,width=1280,height=720,format=BGR ! appsink drop=1"
+    # cap = cv2.VideoCapture(gstreamer_str, cv2.CAP_GSTREAMER)
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
         print("错误：无法打开摄像头")

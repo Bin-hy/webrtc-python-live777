@@ -134,7 +134,7 @@ async def whip_publish_rtp(
 
 if __name__ == "__main__":
     asyncio.run(whip_publish_rtp(
-        whip_url="http://localhost:7777/whip/cv",
+        whip_url="http://localhost:7777/whip/714",
         camera_index=0,
         width=640,
         height=480,
