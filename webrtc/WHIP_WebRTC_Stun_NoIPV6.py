@@ -1,6 +1,8 @@
 import asyncio
 import random
 import logging
+from fractions import Fraction
+
 import cv2
 import os
 import time
@@ -17,25 +19,14 @@ logger = logging.getLogger("WHIP_Publisher")
 
 
 class CameraStreamTrack(VideoStreamTrack):
-    """自定义视频流轨道，直接从摄像头获取帧"""
-
     def __init__(self, camera_index=0, width=640, height=480, fps=30):
-        super().__init__()  # 初始化父类
+        super().__init__()
         self.camera = cv2.VideoCapture(camera_index)
-        if not self.camera.isOpened():
-            raise RuntimeError(f"摄像头 {camera_index} 打开失败")
-
-        # 设置摄像头参数
         self.camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
         self.camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
         self.camera.set(cv2.CAP_PROP_FPS, fps)
-
-        # 控制帧率
-        self.fps = fps
         self.frame_interval = 1.0 / fps
         self.last_frame_time = time.time()
-
-        logger.info("摄像头已就绪 (%dx%d @%dfps)", width, height, fps)
 
     async def recv(self):
         # 控制帧率
@@ -43,20 +34,18 @@ class CameraStreamTrack(VideoStreamTrack):
         elapsed = now - self.last_frame_time
         if elapsed < self.frame_interval:
             await asyncio.sleep(self.frame_interval - elapsed)
-        self.last_frame_time = time.time()
+        self.last_frame_time = now
 
-        # 读取帧
+        # 读取并转换帧
         ret, frame = self.camera.read()
         if not ret:
-            raise RuntimeError("无法从摄像头读取帧")
+            raise RuntimeError("摄像头读取失败")
 
-        # 转换为YUV420P格式（VP8/VP9推荐格式）
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2YUV_I420)
-
-        # 创建视频帧（使用整数时间戳）
         av_frame = VideoFrame.from_ndarray(frame, format="yuv420p")
-        av_frame.pts = int(time.time() * 1000)  # 毫秒级时间戳
-        av_frame.time_base = "1/1000"
+
+        av_frame.pts = int(now * 1000)  # 毫秒时间戳
+        av_frame.time_base = Fraction(1, 1000)
 
         return av_frame
 
@@ -64,16 +53,20 @@ class CameraStreamTrack(VideoStreamTrack):
         if self.camera.isOpened():
             self.camera.release()
 
-
-async def whip_publish_webrtc():
+async def whip_publish_webrtc(
+        live777_base_url="http://huai-xhy.site:7777",
+        live_stream_id=None,
+):
     pc = None
+    # 如果没有提供stream_id，生成一个随机ID
+    if live_stream_id is None:
+        live_stream_id = str(random.randint(100000000, 999999999))
     try:
         # 配置ICE服务器（STUN+TURN）
         pc = RTCPeerConnection(
             configuration=RTCConfiguration(
                 iceServers=[
-
-                    # TURN服务器（需要认证）
+                    # # TURN服务器（需要认证）
                     RTCIceServer(
                         # urls= "stun:stun.l.google.com:19302"
                         urls="stun:159.75.120.92:3478",
@@ -107,7 +100,7 @@ async def whip_publish_webrtc():
         await pc.setLocalDescription(offer)
 
         # 发送WHIP请求
-        whip_url = "http://huai-xhy.site:7777/whip/123456789"
+        whip_url = f"{live777_base_url}/whip/{live_stream_id}"
         async with ClientSession() as session:
             async with session.post(
                     whip_url,
@@ -136,9 +129,26 @@ async def whip_publish_webrtc():
     except Exception as e:
         logger.error(f"发生错误: {str(e)}", exc_info=True)
     finally:
-        if pc:
+        logger.info("开始清理资源...")
+
+        # 关闭WebRTC连接
+        if pc is not None:
             await pc.close()
             logger.info("WebRTC连接已关闭")
+
+        # 发送DELETE请求通知服务器
+        if live_stream_id:
+            delete_url = f"{live777_base_url}/api/streams/{live_stream_id}"
+            logger.info("发送DELETE请求到: %s", delete_url)
+            try:
+                async with ClientSession() as session:
+                    async with session.delete(delete_url) as resp:
+                        if resp.status == 204:
+                            logger.info("成功终止服务器端会话")
+                        else:
+                            logger.error("DELETE请求失败: HTTP %d", resp.status)
+            except Exception as e:
+                logger.error("发送DELETE请求时出错: %s", str(e))
 
 
 if __name__ == "__main__":
@@ -146,4 +156,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     # 运行推流
+    asyncio.run(whip_publish_webrtc())
+
+async def connect_push():
     asyncio.run(whip_publish_webrtc())
