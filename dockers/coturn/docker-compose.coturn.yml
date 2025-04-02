@@ -1,0 +1,18 @@
+services:
+  coturn:
+    image: coturn/coturn:latest
+    container_name: coturn_server
+    restart: unless-stopped
+#    network_mode: host  # 使用主机网络模式以支持全范围的端口映射
+    ports:
+      - "3478:3478/udp"   # STUN/TURN 核心端口
+      - "3478:3478/tcp"   # 备用TCP端口
+      - "49160-49200:49160-49200/udp"  # TURN中继端口范围
+    environment:
+      - TURN_USERNAME=xhy       # 自定义用户名
+      - TURN_PASSWORD=0714@Xhy   # 自定义密码
+    volumes:
+      # 映射配置文件
+      - ./turnserver-example.conf:/etc/coturn/turnserver-example.conf:ro
+      # 映射 TLS 证书和私钥（如果使用）
+#      - ./certs:/etc/coturn/certs:ro
