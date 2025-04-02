@@ -1,3 +1,6 @@
+# @Time     :2025/4/2 12:36
+# @Author   : 淮神
+# @File     :main.py
 import asyncio
 import random
 import logging
@@ -67,24 +70,6 @@ async def whip_publish_webrtc(
             configuration=RTCConfiguration(
                 iceServers=[
                     # live777 配置了 stun和turn 无需推流和拉流 配置
-                    # # TURN服务器（需要认证）
-                    # RTCIceServer(
-                    #     urls= "stun:stun.22333.fun",
-                    #     # urls="stun:huai-xhy.site:3478",
-                    #     # username="myuser",
-                    #     # credential="mypassword"
-                    # ),
-                    # RTCIceServer(urls="stun:cn.22333.fun"),
-                    # RTCIceServer(
-                    #     urls="turn:turn.22333.fun",
-                    #     username="live777",
-                    #     credential="live777"
-                    # ),
-                    # RTCIceServer(
-                    #     urls="turn:cn.22333.fun",
-                    #     username="live777",
-                    #     credential="live777"
-                    # )
                 ]
             )
         )
@@ -170,9 +155,3 @@ if __name__ == "__main__":
     # 运行推流
     asyncio.run(whip_publish_webrtc()) # 默认推流到远端 live777
     # asyncio.run(whip_publish_webrtc(live777_base_url="http://localhost:7777",live_stream_id="777")) # 自定义位置
-
-def run_webrtc(
-        live777_base_url="http://huai-xhy.site:7777", # 我的默认 live777
-        # live_stream_id=None,
-):
-    asyncio.run(whip_publish_webrtc(live777_base_url=live777_base_url))
