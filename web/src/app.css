@@ -1,0 +1,116 @@
+#root {
+  max-width: 90vw;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.streams-container {
+  margin: 20px 0;
+  max-width: 800px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.streams-header {
+  display: flex;
+  background-color: #f5f5f5;
+  padding: 10px 15px;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+}
+
+.stream-item {
+  display: flex;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #eee;
+}
+
+.stream-item:hover {
+  background-color: #f9f9f9;
+}
+
+.stream-item.active {
+  background-color: #e6f7ff;
+}
+
+.stream-id {
+  flex: 1;
+  font-family: monospace;
+}
+
+.stream-created {
+  flex: 1;
+  color: #666;
+}
+
+.error-message {
+  color: #ff4d4f;
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #fff2f0;
+  border-radius: 4px;
+}
+
+button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #d9d9d9;
+  cursor: not-allowed;
+}
+
+@media (prefers-color-scheme: dark) {
+  .streams-container {
+    border-color: #444;
+  }
+  
+  .streams-header {
+    background-color: #333;
+    border-color: #444;
+  }
+  
+  .stream-item {
+    border-color: #444;
+  }
+  
+  .stream-item:hover {
+    background-color: #333;
+  }
+  
+  .stream-item.active {
+    background-color: #1a3a5c;
+  }
+  
+  .stream-created {
+    color: #aaa;
+  }
+}
+
+.fetch-button {
+  min-width: 120px;
+  padding: 8px 16px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.fetch-button:disabled {
+  background-color: #d9d9d9;
+  color: #666;
+  cursor: not-allowed;
+}

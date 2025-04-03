@@ -6,7 +6,7 @@ from aiohttp import ClientSession
 from aiortc import RTCPeerConnection, VideoStreamTrack, RTCSessionDescription
 from aiortc.contrib.media import MediaBlackhole
 from av import VideoFrame
-
+import re
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("WHIP_Publisher")
 
@@ -150,7 +150,10 @@ async def whip_publish_webrtc(
 
 
 if __name__ == "__main__":
-    import re
+
     # 使用随机stream_id启动推流
     # asyncio.run(whip_publish_webrtc(live777_base_url="http://localhost:7777"))
     asyncio.run(whip_publish_webrtc())
+
+def run (live777Url:str = "http://huai-xhy.site:7777"): # 我的live777部署位置
+    asyncio.run(whip_publish_webrtc(live777_base_url=live777Url))

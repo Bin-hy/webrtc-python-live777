@@ -1,0 +1,9 @@
+services:
+  live777-server:
+    image: ghcr.io/binbat/live777-server:latest
+    container_name: live777-server
+    network_mode: host
+    command: live777
+    restart: unless-stopped
+    volumes:
+      - ./conf/live777.toml:/etc/live777/live777.toml
