@@ -153,5 +153,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     # 运行推流
-    asyncio.run(whip_publish_webrtc()) # 默认推流到远端 live777
+    asyncio.run(whip_publish_webrtc(live777_base_url="http://localhost:7777")) # 默认推流到远端 live777
     # asyncio.run(whip_publish_webrtc(live777_base_url="http://localhost:7777",live_stream_id="777")) # 自定义位置

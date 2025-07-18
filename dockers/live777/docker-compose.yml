@@ -2,8 +2,10 @@ services:
   live777-server:
     image: ghcr.io/binbat/live777-server:latest
     container_name: live777-server
-    network_mode: host
+    # network_mode: host
     command: live777
     restart: unless-stopped
+    ports:
+      - 7777:7777
     volumes:
       - ./conf/live777.toml:/etc/live777/live777.toml
