@@ -15,7 +15,7 @@ interface StreamInfo {
 
 function App() {
   // const [mode, setMode] = useState('whep')
-  const [whepAddressBase, setLive777BaseUrl] = useState('http://huai-xhy.site:7777')
+  const [whepAddressBase, setLive777BaseUrl] = useState('http://live777.huai-xhy.site')
   const [roomId, setRoomId] = useState("ar");
   const [availableStreams, setAvailableStreams] = useState<StreamInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
